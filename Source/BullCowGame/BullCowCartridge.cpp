@@ -3,37 +3,70 @@
 
 void UBullCowCartridge::BeginPlay() // When the game starts
 {
-    Super::BeginPlay();
+	Super::BeginPlay();
 	SetupGame();
-	
-	PrintLine(TEXT("Welcome to Bull Cow Game!")) ;
-	PrintLine(FString::Printf(TEXT("The Hidde Word is: %s"),*HiddenWord));
-	PrintLine(TEXT("Input something and press enter"));
+
+	PrintLine(TEXT("The Hidde Word is: %s. It's %i characters long."), *HiddenWord, HiddenWord.Len());
 }
 
 void UBullCowCartridge::OnInput(const FString& Input) // When the player hits enter
 {
-	ClearScreen();
-	
+	if (bGameOver)
+	{
+		ClearScreen();
+		SetupGame();
+	}
+	else
+	{
+		ProcessGuess(Input);
+	}
+}
 
-	if(Input == HiddenWord)
+void UBullCowCartridge::SetupGame()
+{
+	PrintLine(TEXT("Welcome to Bull Cow Game!"));
+
+	HiddenWord = TEXT("kire");
+	Lives = HiddenWord.Len();
+	bGameOver = false;
+
+	PrintLine(TEXT("The Hidden Word is %i characters long."), HiddenWord.Len());
+	PrintLine(TEXT("You have %i lives."), Lives);
+	PrintLine(TEXT("Type in your guess and press enter..."));
+}
+
+void UBullCowCartridge::ProcessGuess(FString Guess)
+{
+	if (Guess == HiddenWord)
 	{
 		PrintLine(TEXT("Won!"));
-	}else
+		EndGame();
+		return;
+	}
+
+	
+	if (Guess.Len() != HiddenWord.Len())
 	{
-		if(Input.Len() != HiddenWord.Len())
-		{
-			PrintLine(TEXT("Wrong number of characters"));
-		}
-		
-		PrintLine(TEXT("Lose!"));
+		PrintLine(TEXT("The Hidden Word is %i characters long. Try again!"), HiddenWord.Len());
+		return;
+	}
+	
+	Lives--;
+	PrintLine(TEXT("You lost a life!. %i live(s) left."), Lives);
+	if (Lives == 0)
+	{
+		ClearScreen();
+		PrintLine("You have no lives left!");
+		PrintLine(TEXT("The Hidden Word was %s"), *HiddenWord);
+		EndGame();
 	}
 
 	
 }
 
-void UBullCowCartridge::SetupGame()
+
+void UBullCowCartridge::EndGame()
 {
-	HiddenWord = TEXT("kire");
-	Lives = 4;
+	bGameOver = true;
+	PrintLine(TEXT("The game is over. \nPress enter to play again!"));
 }
